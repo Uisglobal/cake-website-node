@@ -1,6 +1,8 @@
 // router.js
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose'); // Import mongoose
+
 const Cart = require('../Models/Carts');
 
 // GET cart by user ID
@@ -18,9 +20,18 @@ router.post('/:userId', async (req, res) => {
     const { products } = req.body;
 
     try {
-        let cart = await Cart.findOneAndUpdate({ user: req.params.userId },
-            { $set: { products: products } },
-            { new: true, upsert: true });
+        // Generate a new ObjectId for cartId
+        const cartId = new mongoose.Types.ObjectId();
+
+        // Create a new cart document
+        const cart = new Cart({
+            cartId: cartId,
+            user: req.params.userId,
+            products: products
+        });
+
+        // Save the cart document
+        await cart.save();
 
         res.status(201).json(cart);
     } catch (err) {

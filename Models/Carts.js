@@ -1,4 +1,3 @@
-// cartSchema
 const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema({
@@ -11,11 +10,19 @@ const cartItemSchema = new mongoose.Schema({
 });
 
 const cartSchema = new mongoose.Schema({
-    cartId: { type: Number, unique: true, required: true },
+    cartId: { type: mongoose.Schema.Types.ObjectId, unique: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     products: [cartItemSchema], // Array of cart items with details
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
+});
+
+// Pre-save hook to generate a new ObjectId for cartId
+cartSchema.pre('save', function(next) {
+    if (!this.cartId) {
+        this.cartId = new mongoose.Types.ObjectId();
+    }
+    next();
 });
 
 const Cart = mongoose.model('Cart', cartSchema);
